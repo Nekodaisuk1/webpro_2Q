@@ -22,7 +22,7 @@
       justify-content: space-between;
       align-items: center;
     }
-    #taskList {
+    #taskList, #completedTasks {
       position: relative;
       margin-top: 2rem;
       display: flex;
@@ -61,6 +61,9 @@
     label, input, select, button {
       margin: 0.3rem;
     }
+    nav button {
+      margin-right: 1rem;
+    }
     @media (max-width: 600px) {
       body { font-size: 90%; }
     }
@@ -79,20 +82,36 @@
     <button onclick="addTask()">追加</button>
   </section>
 
+  <nav>
+    <button onclick="switchTab('todo')">未完了タスク</button>
+    <button onclick="switchTab('completed')">完了したタスク</button>
+  </nav>
+
   <div id="taskList"></div>
+  <div id="completedTasks" style="display: none;"></div>
 
   <script>
     let tasks = JSON.parse(localStorage.getItem("devTasks")) || [];
+    let currentTab = 'todo';
 
     function saveTasks() {
       localStorage.setItem("devTasks", JSON.stringify(tasks));
     }
 
     function renderTasks() {
-      const list = document.getElementById("taskList");
-      list.innerHTML = "";
+      const taskList = document.getElementById("taskList");
+      const completedList = document.getElementById("completedTasks");
+      taskList.innerHTML = "";
+      completedList.innerHTML = "";
+
       const rootTasks = tasks.filter(t => !t.parentId);
-      rootTasks.forEach(t => renderTask(t, list));
+      rootTasks.forEach(t => {
+        if (!t.completed) {
+          renderTask(t, taskList);
+        } else {
+          renderTask(t, completedList);
+        }
+      });
       updateParentSelect();
     }
 
@@ -111,12 +130,14 @@
 
       const children = tasks.filter(t => t.parentId === task.id);
       children.forEach(child => {
-        const line = document.createElement("div");
-        line.className = "connector";
-        line.style.height = `${60}px`;
-        line.style.top = `${card.offsetHeight}px`;
-        wrapper.appendChild(line);
-        renderTask(child, wrapper, level + 1);
+        if (child.completed === task.completed) {
+          const line = document.createElement("div");
+          line.className = "connector";
+          line.style.height = `${60}px`;
+          line.style.top = `${card.offsetHeight}px`;
+          wrapper.appendChild(line);
+          renderTask(child, wrapper, level + 1);
+        }
       });
 
       container.appendChild(wrapper);
@@ -141,10 +162,16 @@
       renderTasks();
     }
 
+    function switchTab(tab) {
+      currentTab = tab;
+      document.getElementById("taskList").style.display = tab === 'todo' ? 'flex' : 'none';
+      document.getElementById("completedTasks").style.display = tab === 'completed' ? 'flex' : 'none';
+    }
+
     function updateParentSelect() {
       const select = document.getElementById("parentSelect");
       select.innerHTML = '<option value="">(親なし)</option>';
-      tasks.forEach(t => {
+      tasks.filter(t => !t.completed).forEach(t => {
         const opt = document.createElement("option");
         opt.value = t.id;
         opt.textContent = t.title;
@@ -159,4 +186,4 @@
     renderTasks();
   </script>
 </body>
-</html>
+</html>あ
