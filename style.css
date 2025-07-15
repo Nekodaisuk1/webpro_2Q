@@ -7,6 +7,15 @@ body {
 .controls {
   margin-bottom: 1rem;
 }
+.radius-slider {
+  position: absolute;
+  z-index: 1000;
+  pointer-events: all;
+}
+#taskContainer {
+  position: relative;
+}
+
 .task {
   position: absolute;
   background: white;
