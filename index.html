@@ -23,32 +23,40 @@
       align-items: center;
     }
     #taskList {
-      margin-top: 2rem;
-    }
-    .task {
-      margin-left: 1rem;
-      border-left: 2px solid #888;
-      padding-left: 1rem;
       position: relative;
+      margin-top: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
     }
-    .task::before {
-      content: "";
-      width: 10px;
-      height: 10px;
-      background: #888;
-      border-radius: 50%;
-      position: absolute;
-      left: -6px;
-      top: 6px;
+    .task-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      padding: 1rem;
+      position: relative;
+      width: max-content;
+      min-width: 200px;
+    }
+    .dark .task-card {
+      background: #1e1e1e;
     }
     .completed {
       text-decoration: line-through;
       color: gray;
     }
     .task-info {
-      font-size: 0.9rem;
-      margin-top: 0.2rem;
+      font-size: 0.85rem;
+      margin-top: 0.3rem;
       color: #666;
+    }
+    .connector {
+      position: absolute;
+      width: 2px;
+      background-color: #999;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
     }
     label, input, select, button {
       margin: 0.3rem;
@@ -84,21 +92,34 @@
       const list = document.getElementById("taskList");
       list.innerHTML = "";
       const rootTasks = tasks.filter(t => !t.parentId);
-      rootTasks.forEach(t => renderTask(t, list, 0));
+      rootTasks.forEach(t => renderTask(t, list));
       updateParentSelect();
     }
 
-    function renderTask(task, container, level) {
-      const div = document.createElement("div");
-      div.className = "task" + (task.completed ? " completed" : "");
-      div.style.marginLeft = `${level * 1.5}rem`;
-      div.innerHTML = `
-        <span onclick="toggleComplete('${task.id}')">${task.title}</span>
+    function renderTask(task, container, level = 0) {
+      const wrapper = document.createElement("div");
+      wrapper.style.marginLeft = `${level * 40}px`;
+      wrapper.style.position = "relative";
+
+      const card = document.createElement("div");
+      card.className = "task-card" + (task.completed ? " completed" : "");
+      card.innerHTML = `
+        <strong onclick="toggleComplete('${task.id}')">${task.title}</strong>
         <div class="task-info">機能: ${task.feature}</div>
       `;
-      container.appendChild(div);
+      wrapper.appendChild(card);
+
       const children = tasks.filter(t => t.parentId === task.id);
-      children.forEach(child => renderTask(child, container, level + 1));
+      children.forEach(child => {
+        const line = document.createElement("div");
+        line.className = "connector";
+        line.style.height = `${60}px`;
+        line.style.top = `${card.offsetHeight}px`;
+        wrapper.appendChild(line);
+        renderTask(child, wrapper, level + 1);
+      });
+
+      container.appendChild(wrapper);
     }
 
     function addTask() {
