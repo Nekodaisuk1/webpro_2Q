@@ -26,25 +26,24 @@
     #taskList, #completedTasks {
       position: relative;
       margin-top: 2rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 2rem;
     }
     .task-wrapper {
+      margin-bottom: 2rem;
       position: relative;
     }
     .task-card {
       background: white;
       border-radius: 50%;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
       width: 120px;
       height: 120px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      padding: 1rem;
+      position: relative;
+      text-align: center;
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
-      text-align: center;
-      padding: 0.5rem;
+      align-items: center;
     }
     .dark .task-card {
       background: #1e1e1e;
@@ -56,10 +55,9 @@
     .task-info {
       font-size: 0.75rem;
       color: #666;
-      margin-top: 0.3rem;
     }
     .highlight {
-      border: 3px solid #0077ff;
+      border: 2px solid #0077ff;
     }
     label, input, select, button {
       margin: 0.3rem;
@@ -75,21 +73,17 @@
       border-radius: 5px;
     }
     .delete-button {
-      margin-top: 0.4rem;
+      margin-top: 0.5rem;
       padding: 0.2rem 0.5rem;
       background-color: crimson;
       color: white;
       border: none;
       border-radius: 3px;
-      font-size: 0.7rem;
       cursor: pointer;
+      font-size: 0.7rem;
     }
     @media (max-width: 600px) {
-      .task-card {
-        width: 100px;
-        height: 100px;
-        font-size: 0.85rem;
-      }
+      body { font-size: 90%; }
     }
   </style>
 </head>
@@ -155,16 +149,17 @@
       updateTabHighlight();
     }
 
-    function renderTask(task, container) {
+    function renderTask(task, container, level = 0) {
       const wrapper = document.createElement("div");
       wrapper.className = "task-wrapper";
+      wrapper.style.marginLeft = `${level * 40}px`;
 
       const card = document.createElement("div");
       card.className = "task-card" + (task.completed ? " completed" : "");
       card.id = `task-${task.id}`;
       card.innerHTML = `
         <strong onclick="toggleComplete('${task.id}')">${task.title}</strong>
-        <div class="task-info">${task.feature}</div>
+        <div class="task-info">機能: ${task.feature}</div>
         <button class="delete-button" onclick="deleteTask('${task.id}')">削除</button>
       `;
       wrapper.appendChild(card);
@@ -174,9 +169,9 @@
         const parentEl = document.getElementById(`task-${task.parentId}`);
         if (parentEl) {
           const line = new LeaderLine(
-            LeaderLine.areaAnchor(parentEl, { x: '50%', y: '50%' }),
-            LeaderLine.areaAnchor(card, { x: '50%', y: '50%' }),
-            { color: 'gray', path: 'arc', startPlug: 'disc', endPlug: 'arrow3' }
+            LeaderLine.areaAnchor(parentEl, { shape: 'circle' }),
+            LeaderLine.areaAnchor(card, { shape: 'circle' }),
+            { color: 'gray', path: 'arc', startSocket: 'bottom', endSocket: 'top' }
           );
           lines.push(line);
         }
@@ -185,7 +180,7 @@
       const children = tasks.filter(t => t.parentId === task.id);
       children.forEach(child => {
         if (child.completed === task.completed) {
-          renderTask(child, container);
+          renderTask(child, container, level + 1);
         }
       });
 
@@ -236,8 +231,8 @@
 
     function switchTab(tab) {
       currentTab = tab;
-      document.getElementById("taskList").style.display = tab === 'todo' ? 'flex' : 'none';
-      document.getElementById("completedTasks").style.display = tab === 'completed' ? 'flex' : 'none';
+      document.getElementById("taskList").style.display = tab === 'todo' ? 'block' : 'none';
+      document.getElementById("completedTasks").style.display = tab === 'completed' ? 'block' : 'none';
       updateTabHighlight();
     }
 
