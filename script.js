@@ -1,6 +1,7 @@
 let tasks = [];
 let taskId = 0;
 let lines = [];
+let circleSettings = {}; // 子円の中心位置と半径
 
 function addTask() {
   const name = document.getElementById("taskName").value;
@@ -46,6 +47,7 @@ function render() {
   const container = document.getElementById("taskContainer");
   container.innerHTML = "";
   clearLines();
+  circleSettings = {}; // 子円情報を初期化
 
   const centerX = window.innerWidth / 2;
   const centerY = window.innerHeight / 2;
@@ -76,13 +78,25 @@ function layoutChildren(parent, parentX, parentY, baseAngle, depth = 1) {
   const children = getChildren(parent.id);
   if (children.length === 0) return;
 
-  const r = 120;
-  const angleStep = (2 * Math.PI) / children.length;
-  const offsetDistance = 250;
+  const defaultRadius = 120;
+  const baseDistance = 250;
+  const spreadFactor = 40;
 
-  // 完全に独立した円の中心
-  const circleX = parentX + Math.cos(baseAngle) * offsetDistance;
-  const circleY = parentY + Math.sin(baseAngle) * offsetDistance;
+  // 子円の中心を決定（親から一定距離）
+  const distance = baseDistance + children.length * spreadFactor;
+  const circleX = parentX + Math.cos(baseAngle) * distance;
+  const circleY = parentY + Math.sin(baseAngle) * distance;
+
+  const circleId = parent.id;
+  if (!circleSettings[circleId]) {
+    circleSettings[circleId] = { radius: defaultRadius };
+  }
+
+  // スライダーを子円中心の近くに追加
+  createRadiusSlider(circleId, circleX, circleY);
+
+  const r = circleSettings[circleId].radius;
+  const angleStep = (2 * Math.PI) / children.length;
 
   children.forEach((child, i) => {
     const angle = i * angleStep;
@@ -94,8 +108,26 @@ function layoutChildren(parent, parentX, parentY, baseAngle, depth = 1) {
     const toEl = document.getElementById("task-" + child.id);
     drawLineBetween(fromEl, toEl);
 
-    layoutChildren(child, childX, childY, angle, depth + 1); // 再帰的配置
+    // 再帰的に孫を処理
+    layoutChildren(child, childX, childY, angle, depth + 1);
   });
+}
+
+function createRadiusSlider(circleId, x, y) {
+  const container = document.getElementById("taskContainer");
+  const slider = document.createElement("input");
+  slider.type = "range";
+  slider.min = 50;
+  slider.max = 300;
+  slider.value = circleSettings[circleId].radius;
+  slider.className = "radius-slider";
+
+  positionElement(slider, x, y + 70);
+  slider.oninput = () => {
+    circleSettings[circleId].radius = parseInt(slider.value);
+    render(); // スライダー変更時に再描画
+  };
+  container.appendChild(slider);
 }
 
 window.addEventListener("resize", render);
