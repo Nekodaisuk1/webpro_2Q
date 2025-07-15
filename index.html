@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>開発タスクツリーTodo</title>
+  <script src="https://cdn.jsdelivr.net/npm/leader-line@1.0.7/leader-line.min.js"></script>
   <style>
     body {
       font-family: sans-serif;
@@ -25,9 +26,10 @@
     #taskList, #completedTasks {
       position: relative;
       margin-top: 2rem;
-      display: flex;
-      flex-direction: column;
-      gap: 2rem;
+    }
+    .task-wrapper {
+      margin-bottom: 2rem;
+      position: relative;
     }
     .task-card {
       background: white;
@@ -35,8 +37,8 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
       padding: 1rem;
       position: relative;
-      width: max-content;
       min-width: 200px;
+      display: inline-block;
     }
     .dark .task-card {
       background: #1e1e1e;
@@ -49,14 +51,6 @@
       font-size: 0.85rem;
       margin-top: 0.3rem;
       color: #666;
-    }
-    .connector {
-      position: absolute;
-      width: 2px;
-      background-color: #999;
-      left: 15px;
-      top: 50%;
-      transform: translateY(-50%);
     }
     .highlight {
       border: 2px solid #0077ff;
@@ -113,12 +107,19 @@
   <script>
     let tasks = JSON.parse(localStorage.getItem("devTasks")) || [];
     let currentTab = 'todo';
+    let lines = [];
 
     function saveTasks() {
       localStorage.setItem("devTasks", JSON.stringify(tasks));
     }
 
+    function clearLines() {
+      lines.forEach(line => line.remove());
+      lines = [];
+    }
+
     function renderTasks() {
+      clearLines();
       const taskList = document.getElementById("taskList");
       const completedList = document.getElementById("completedTasks");
       taskList.innerHTML = "";
@@ -145,31 +146,39 @@
 
     function renderTask(task, container, level = 0) {
       const wrapper = document.createElement("div");
+      wrapper.className = "task-wrapper";
       wrapper.style.marginLeft = `${level * 40}px`;
-      wrapper.style.position = "relative";
 
       const card = document.createElement("div");
       card.className = "task-card" + (task.completed ? " completed" : "");
+      card.id = `task-${task.id}`;
       card.innerHTML = `
         <strong onclick="toggleComplete('${task.id}')">${task.title}</strong>
         <div class="task-info">機能: ${task.feature}</div>
         <button class="delete-button" onclick="deleteTask('${task.id}')">削除</button>
       `;
       wrapper.appendChild(card);
+      container.appendChild(wrapper);
+
+      if (task.parentId) {
+        const parentEl = document.getElementById(`task-${task.parentId}`);
+        if (parentEl) {
+          const line = new LeaderLine(
+            LeaderLine.pointAnchor(parentEl, { x: '50%', y: '100%' }),
+            LeaderLine.pointAnchor(card, { x: '50%', y: '0%' }),
+            { color: 'gray', path: 'straight' }
+          );
+          lines.push(line);
+        }
+      }
 
       const children = tasks.filter(t => t.parentId === task.id);
       children.forEach(child => {
         if (child.completed === task.completed) {
-          const line = document.createElement("div");
-          line.className = "connector";
-          line.style.height = `${60}px`;
-          line.style.top = `${card.offsetHeight}px`;
-          wrapper.appendChild(line);
-          renderTask(child, wrapper, level + 1);
+          renderTask(child, container, level + 1);
         }
       });
 
-      container.appendChild(wrapper);
       return card;
     }
 
@@ -217,8 +226,8 @@
 
     function switchTab(tab) {
       currentTab = tab;
-      document.getElementById("taskList").style.display = tab === 'todo' ? 'flex' : 'none';
-      document.getElementById("completedTasks").style.display = tab === 'completed' ? 'flex' : 'none';
+      document.getElementById("taskList").style.display = tab === 'todo' ? 'block' : 'none';
+      document.getElementById("completedTasks").style.display = tab === 'completed' ? 'block' : 'none';
       updateTabHighlight();
     }
 
