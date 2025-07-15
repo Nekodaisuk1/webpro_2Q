@@ -58,11 +58,30 @@
       top: 50%;
       transform: translateY(-50%);
     }
+    .highlight {
+      border: 2px solid #0077ff;
+    }
     label, input, select, button {
       margin: 0.3rem;
     }
     nav button {
       margin-right: 1rem;
+      padding: 0.5rem 1rem;
+    }
+    .active-tab {
+      background-color: #0077ff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    .delete-button {
+      margin-top: 0.5rem;
+      padding: 0.2rem 0.5rem;
+      background-color: crimson;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
     }
     @media (max-width: 600px) {
       body { font-size: 90%; }
@@ -83,8 +102,9 @@
   </section>
 
   <nav>
-    <button onclick="switchTab('todo')">未完了タスク</button>
-    <button onclick="switchTab('completed')">完了したタスク</button>
+    <button id="tab-todo" onclick="switchTab('todo')">未完了タスク</button>
+    <button id="tab-completed" onclick="switchTab('completed')">完了したタスク</button>
+    <button onclick="deleteAllCompleted()">完了タスクを全削除</button>
   </nav>
 
   <div id="taskList"></div>
@@ -105,14 +125,22 @@
       completedList.innerHTML = "";
 
       const rootTasks = tasks.filter(t => !t.parentId);
+      let lastVisibleCard = null;
+
       rootTasks.forEach(t => {
         if (!t.completed) {
-          renderTask(t, taskList);
+          lastVisibleCard = renderTask(t, taskList);
         } else {
           renderTask(t, completedList);
         }
       });
+
+      if (lastVisibleCard) {
+        lastVisibleCard.classList.add("highlight");
+      }
+
       updateParentSelect();
+      updateTabHighlight();
     }
 
     function renderTask(task, container, level = 0) {
@@ -125,6 +153,7 @@
       card.innerHTML = `
         <strong onclick="toggleComplete('${task.id}')">${task.title}</strong>
         <div class="task-info">機能: ${task.feature}</div>
+        <button class="delete-button" onclick="deleteTask('${task.id}')">削除</button>
       `;
       wrapper.appendChild(card);
 
@@ -141,6 +170,7 @@
       });
 
       container.appendChild(wrapper);
+      return card;
     }
 
     function addTask() {
@@ -162,10 +192,39 @@
       renderTasks();
     }
 
+    function deleteTask(id) {
+      const deleteRecursive = (id) => {
+        const children = tasks.filter(t => t.parentId === id);
+        children.forEach(child => deleteRecursive(child.id));
+        tasks = tasks.filter(t => t.id !== id);
+      };
+      deleteRecursive(id);
+      saveTasks();
+      renderTasks();
+    }
+
+    function deleteAllCompleted() {
+      const deleteRecursive = (id) => {
+        const children = tasks.filter(t => t.parentId === id);
+        children.forEach(child => deleteRecursive(child.id));
+        tasks = tasks.filter(t => t.id !== id);
+      };
+      const completedTasks = tasks.filter(t => t.completed);
+      completedTasks.forEach(t => deleteRecursive(t.id));
+      saveTasks();
+      renderTasks();
+    }
+
     function switchTab(tab) {
       currentTab = tab;
       document.getElementById("taskList").style.display = tab === 'todo' ? 'flex' : 'none';
       document.getElementById("completedTasks").style.display = tab === 'completed' ? 'flex' : 'none';
+      updateTabHighlight();
+    }
+
+    function updateTabHighlight() {
+      document.getElementById("tab-todo").classList.toggle("active-tab", currentTab === 'todo');
+      document.getElementById("tab-completed").classList.toggle("active-tab", currentTab === 'completed');
     }
 
     function updateParentSelect() {
@@ -186,4 +245,4 @@
     renderTasks();
   </script>
 </body>
-</html>あ
+</html>
