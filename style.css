@@ -1,22 +1,23 @@
-/* ===== レイアウト全般 ===== */
+/* ===== ベース ===== */
 body{
   font-family:sans-serif;
   background:#f2f2f2;
   margin:0;
-  /* controls 70px + tab-bar 40px */
+  /* controls 70px + tab-bar 40px = 110px */
   padding-top:110px;
   overflow:auto;
 }
 
-/* --- 入力欄 --- */
+/* ===== 入力バー ===== */
 .controls{
   position:fixed; top:0; width:100%;
   background:#fff; padding:1rem;
   box-shadow:0 2px 5px rgba(0,0,0,.1);
   z-index:2000;
 }
+.controls button{ margin-left:.3rem; }
 
-/* --- タブバー --- */
+/* ===== タブバー ===== */
 .tab-bar{
   position:fixed; top:70px; width:100%; height:40px;
   background:#fafafa; border-bottom:1px solid #ddd;
@@ -30,7 +31,7 @@ body{
 }
 .tab-active{ border-bottom:3px solid #0077ff; font-weight:bold; }
 
-/* --- 円形タスク --- */
+/* ===== タスクカード ===== */
 .task{
   position:absolute;
   width:100px; height:100px;
@@ -41,25 +42,31 @@ body{
 }
 .task h3{ margin:.3rem 0; }
 
-/* --- 共通ボタン --- */
-button{ background:crimson; color:#fff;
-  border:none; border-radius:4px; padding:.3rem .7rem; }
-
-/* --- 大描画キャンバス --- */
+/* ===== 円配置キャンバス ===== */
 #taskContainer{
   position:relative;
-  width:5000px; height:5000px;  /* 広大に確保 */
-  min-width:3000px; min-height:3000px; overflow:visible;
+  width:5000px; height:5000px;
+  min-width:3000px; min-height:3000px;
+  overflow:visible;
+  transform-origin:0 0;             /* ★ ズーム起点 */
+  transition:transform .15s ease;   /* ★ ズームアニメ */
 }
 
-/* --- 円の半径スライダー --- */
+/* ===== スライダー ===== */
 .radius-slider{
   position:absolute; pointer-events:all; z-index:1000;
 }
 
-/* --- 子配置円（可視化） --- */
+/* ===== 子配置円可視化 ===== */
 .circle-visual{
-  position:absolute; border:1px dashed #999;
-  border-radius:50%; transform:translate(-50%,-50%);
-  z-index:0;
+  position:absolute;
+  border:1px dashed #999; border-radius:50%;
+  transform:translate(-50%,-50%); z-index:0;
+}
+
+/* 共通ボタン（追加・ズーム等） */
+button{
+  background:crimson; color:#fff;
+  border:none; border-radius:4px;
+  padding:.3rem .7rem; cursor:pointer;
 }

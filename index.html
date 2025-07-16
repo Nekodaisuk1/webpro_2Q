@@ -8,18 +8,21 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leader-line/1.0.7/leader-line.min.js"></script>
 </head>
 <body>
-  <!-- ① 追加入力欄（固定） -->
+  <!-- 固定入力バー -->
   <div class="controls">
     <input type="text" id="taskName" placeholder="タスク名" />
     <input type="text" id="taskFunction" placeholder="機能" />
     <select id="parentSelect"><option value="">親なし（最上位）</option></select>
     <button onclick="addTask()">追加</button>
+    <!-- ★ ズームボタン -->
+    <button id="zoomIn">＋</button>
+    <button id="zoomOut">－</button>
   </div>
 
-  <!-- ② タブバー（固定） -->
+  <!-- タブバー -->
   <div class="tab-bar" id="tabBar"></div>
 
-  <!-- ③ 描画領域 -->
+  <!-- 描画キャンバス -->
   <div id="taskContainer"></div>
 
   <script src="script.js"></script>
