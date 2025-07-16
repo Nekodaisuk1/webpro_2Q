@@ -23,7 +23,7 @@
     <button id="zoomIn">＋</button>
     <button id="zoomOut">－</button>
     <button id="themeToggle">🌙</button>
-    <span style="font-size:.8rem;opacity:.8">※タスクをクリックで完了</span>
+    <span class="tip">※タスクをクリックで完了トグル</span>
   </div>
 
   <!-- タブバー -->
@@ -31,6 +31,15 @@
 
   <!-- 大描画キャンバス -->
   <div id="taskContainer"></div>
+
+  <!-- 下部タスク一覧 -->
+  <div id="taskListPanel">
+    <div class="tasklist-header">
+      <h4>タスク一覧</h4>
+      <button id="collapseListBtn" type="button">▼</button>
+    </div>
+    <div id="taskListBody"></div>
+  </div>
 
   <script src="script.js"></script>
 </body>
