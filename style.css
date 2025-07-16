@@ -2,11 +2,17 @@ body {
   font-family: sans-serif;
   background: #f2f2f2;
   margin: 0;
-  padding: 1rem;
+  padding-top: 70px;
   overflow: auto;
 }
 .controls {
-  margin-bottom: 1rem;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: white;
+  padding: 1rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  z-index: 2000;
 }
 .task {
   position: absolute;
@@ -42,4 +48,11 @@ button {
   position: absolute;
   z-index: 1000;
   pointer-events: all;
+}
+.circle-visual {
+  position: absolute;
+  border: 1px dashed #999;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
 }

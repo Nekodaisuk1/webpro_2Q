@@ -34,8 +34,15 @@ function positionElement(el, x, y) {
   el.style.top = y + "px";
 }
 
-function drawLineBetween(fromEl, toEl) {
-  lines.push(new LeaderLine(fromEl, toEl));
+function drawLineBetween(fromEl, toX, toY) {
+  const dummy = document.createElement("div");
+  dummy.style.position = "absolute";
+  dummy.style.left = toX + "px";
+  dummy.style.top = toY + "px";
+  dummy.style.width = "0";
+  dummy.style.height = "0";
+  document.getElementById("taskContainer").appendChild(dummy);
+  lines.push(new LeaderLine(fromEl, dummy));
 }
 
 function clearLines() {
@@ -74,7 +81,7 @@ function createTaskElement(task, x, y) {
   positionElement(div, x, y);
 }
 
-function layoutChildren(parent, parentX, parentY, baseAngle, depth = 1) {
+function layoutChildren(parent, parentX, parentY, baseAngle) {
   const children = getChildren(parent.id);
   if (children.length === 0) return;
 
@@ -92,21 +99,19 @@ function layoutChildren(parent, parentX, parentY, baseAngle, depth = 1) {
   }
 
   createRadiusSlider(circleId, circleX, circleY);
+  drawCircleVisual(circleX, circleY, circleSettings[circleId].radius);
 
   const r = circleSettings[circleId].radius;
   const angleStep = (2 * Math.PI) / children.length;
+
+  drawLineBetween(document.getElementById("task-" + parent.id), circleX, circleY);
 
   children.forEach((child, i) => {
     const angle = i * angleStep;
     const childX = circleX + Math.cos(angle) * r;
     const childY = circleY + Math.sin(angle) * r;
     createTaskElement(child, childX, childY);
-
-    const fromEl = document.getElementById("task-" + parent.id);
-    const toEl = document.getElementById("task-" + child.id);
-    drawLineBetween(fromEl, toEl);
-
-    layoutChildren(child, childX, childY, angle, depth + 1);
+    layoutChildren(child, childX, childY, angle);
   });
 }
 
@@ -127,4 +132,15 @@ function createRadiusSlider(circleId, x, y) {
   container.appendChild(slider);
 }
 
-window.addEventListener("resize", render);
+function drawCircleVisual(x, y, r) {
+  const container = document.getElementById("taskContainer");
+  const circle = document.createElement("div");
+  circle.className = "circle-visual";
+  circle.style.width = circle.style.height = (r * 2) + "px";
+  positionElement(circle, x, y);
+  container.appendChild(circle);
+}
+
+window.onload = () => {
+  window.scrollTo(2000, 2000); // 初期スナップ表示
+};
