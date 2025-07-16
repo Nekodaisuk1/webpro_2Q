@@ -2,27 +2,34 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>開発用タスクツリー</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- モダンフォント -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leader-line/1.0.7/leader-line.min.js"></script>
 </head>
 <body>
-  <!-- 固定入力バー -->
+  <!-- 固定コントロールバー -->
   <div class="controls">
     <input type="text" id="taskName" placeholder="タスク名" />
     <input type="text" id="taskFunction" placeholder="機能" />
-    <select id="parentSelect"><option value="">親なし（最上位）</option></select>
-    <button onclick="addTask()">追加</button>
-    <!-- ★ ズームボタン -->
+    <select id="parentSelect">
+      <option value="">親なし（最上位）</option>
+    </select>
+    <button id="addBtn" onclick="addTask()">追加</button>
     <button id="zoomIn">＋</button>
     <button id="zoomOut">－</button>
+    <button id="themeToggle">🌙</button>
+    <span style="font-size:.8rem;opacity:.8">※タスクをクリックで完了トグル</span>
   </div>
 
   <!-- タブバー -->
   <div class="tab-bar" id="tabBar"></div>
 
-  <!-- 描画キャンバス -->
+  <!-- 大描画キャンバス -->
   <div id="taskContainer"></div>
 
   <script src="script.js"></script>

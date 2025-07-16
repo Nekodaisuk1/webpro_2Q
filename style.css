@@ -1,72 +1,171 @@
-/* ===== ベース ===== */
+/* ===== デザイン変数 ===== */
+:root{
+  --accent:   #4f8ef7;
+  --bg-light: #f7f9fb;
+  --bg-dark:  #14161a;
+  --card-l:   rgba(255,255,255,.75);
+  --card-d:   rgba(30,30,32,.6);
+  --text-l:   #202428;
+  --text-d:   #e8eaf0;
+  --blur:     10px;
+  --ring:     0 2px 6px rgba(0,0,0,.1);
+}
 body{
-  font-family:sans-serif;
-  background:#f2f2f2;
+  font-family:'Inter',sans-serif;
   margin:0;
-  /* controls 70px + tab-bar 40px = 110px */
-  padding-top:110px;
+  padding-top:110px; /* controls + tab-bar */
+  background:var(--bg-light);
+  color:var(--text-l);
   overflow:auto;
+  transition:.3s background,color;
+}
+body.dark{
+  background:var(--bg-dark);
+  color:var(--text-d);
 }
 
-/* ===== 入力バー ===== */
+/* ===== フローティング入力バー ===== */
 .controls{
-  position:fixed; top:0; width:100%;
-  background:#fff; padding:1rem;
-  box-shadow:0 2px 5px rgba(0,0,0,.1);
+  position:fixed;
+  top:0;
+  left:50%;
+  translate:-50% 0;
+  width:clamp(320px,90%,1100px);
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:.5rem;
+  padding:.8rem 1rem;
+  background:var(--card-l);
+  backdrop-filter:blur(var(--blur));
+  -webkit-backdrop-filter:blur(var(--blur));
+  border-radius:12px;
+  box-shadow:var(--ring);
   z-index:2000;
 }
-.controls button{ margin-left:.3rem; }
+body.dark .controls{ background:var(--card-d); }
+
+.controls input,
+.controls select{
+  flex:1 1 auto;
+  padding:.5rem .8rem;
+  font-size:.9rem;
+  border:none;
+  border-radius:8px;
+  outline:none;
+  background:#fff4;
+  color:inherit;
+  backdrop-filter:blur(calc(var(--blur)/2));
+}
+.controls button{
+  padding:.5rem 1rem;
+  border:none;
+  border-radius:8px;
+  font-size:.9rem;
+  cursor:pointer;
+  transition:.2s;
+}
+.controls button:hover{ filter:brightness(1.1); }
+#zoomIn,#zoomOut{ background:#ddd4; }
+#themeToggle{ background:var(--accent); color:#fff; }
+#addBtn{ background:crimson; color:#fff; }
 
 /* ===== タブバー ===== */
 .tab-bar{
-  position:fixed; top:70px; width:100%; height:40px;
-  background:#fafafa; border-bottom:1px solid #ddd;
-  overflow-x:auto; white-space:nowrap;
+  position:fixed;
+  top:70px;
+  width:100%;
+  height:40px;
+  display:flex;
+  align-items:center;
+  gap:.6rem;
+  padding:0 .8rem;
+  overflow-x:auto;
+  white-space:nowrap;
+  background:var(--card-l);
+  backdrop-filter:blur(var(--blur));
+  -webkit-backdrop-filter:blur(var(--blur));
+  border-bottom:1px solid #0001;
   z-index:1500;
 }
+body.dark .tab-bar{ background:var(--card-d); }
 .tab-bar button{
-  display:inline-block; height:100%;
-  padding:0 1rem; background:none; border:none;
-  cursor:pointer; font-size:.9rem;
+  background:none;
+  border:none;
+  padding:.2rem .8rem;
+  color:inherit;
+  font-size:.85rem;
+  cursor:pointer;
+  border-radius:6px;
+  transition:.2s color;
 }
-.tab-active{ border-bottom:3px solid #0077ff; font-weight:bold; }
+.tab-active{
+  color:var(--accent);
+  font-weight:600;
+  border-bottom:2px solid var(--accent);
+}
+
+/* ===== キャンバス ===== */
+#taskContainer{
+  position:relative;
+  width:5000px;
+  height:5000px;
+  min-width:3000px;
+  min-height:3000px;
+  transform-origin:0 0;
+  transition:transform .15s ease;
+}
 
 /* ===== タスクカード ===== */
 .task{
   position:absolute;
-  width:100px; height:100px;
-  background:#fff; border-radius:50%;
-  padding:1rem; text-align:center;
-  box-shadow:0 0 8px rgba(0,0,0,.1);
-  transform:translate(-50%,-50%);
+  translate:-50% -50%;
+  width:110px;
+  height:110px;
+  border-radius:50%;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  background:rgba(255,255,255,.35);
+  backdrop-filter:blur(calc(var(--blur)/1.5));
+  -webkit-backdrop-filter:blur(calc(var(--blur)/1.5));
+  box-shadow:0 4px 10px rgba(0,0,0,.08);
+  border:1px solid #fff5;
+  transition:.2s;
 }
-.task h3{ margin:.3rem 0; }
-
-/* ===== 円配置キャンバス ===== */
-#taskContainer{
-  position:relative;
-  width:5000px; height:5000px;
-  min-width:3000px; min-height:3000px;
-  overflow:visible;
-  transform-origin:0 0;             /* ★ ズーム起点 */
-  transition:transform .15s ease;   /* ★ ズームアニメ */
+body.dark .task{
+  background:rgba(40,40,46,.55);
+  border-color:#0006;
+}
+.task:hover{ box-shadow:0 6px 16px rgba(0,0,0,.12); }
+.task.completed{
+  opacity:.4;
+  text-decoration:line-through;
 }
 
-/* ===== スライダー ===== */
-.radius-slider{
-  position:absolute; pointer-events:all; z-index:1000;
-}
-
-/* ===== 子配置円可視化 ===== */
+/* ===== 子配置円 ===== */
 .circle-visual{
   position:absolute;
-  border:1px dashed #999; border-radius:50%;
-  transform:translate(-50%,-50%); z-index:0;
+  translate:-50% -50%;
+  border:1px dashed var(--accent);
+  border-radius:50%;
+  opacity:.25;
+  pointer-events:none;
 }
 
-/* 共通ボタン（追加・ズーム等） */
-button{
-  background:crimson; color:#fff;
-  border:none; border-radius:4px;
-  padding:.3rem .7rem; cursor:pointer;
+/* ===== 半径スライダー ===== */
+.radius-slider{
+  position:absolute;
+  translate:-50% -50%;
+  width:130px;
+  accent-color:var(--accent);
+  z-index:1000;
+}
+
+/* ===== レスポンシブ ===== */
+@media(max-width:600px){
+  .task{ width:80px; height:80px; font-size:.6rem; }
+  .radius-slider{ width:90px; }
+  .controls{ gap:.4rem; }
 }
