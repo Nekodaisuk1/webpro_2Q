@@ -5,7 +5,7 @@
   <title>開発用タスクツリー</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- フォント -->
+  <!-- モダンフォント -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="style.css" />
@@ -23,22 +23,63 @@
     <button id="zoomIn">＋</button>
     <button id="zoomOut">－</button>
     <button id="themeToggle">🌙</button>
-    <span class="tip">※タスクをクリックで完了</span>
+    <span class="tip">※タスククリックで完了</span>
   </div>
 
-  <!-- タブバー -->
-  <div class="tab-bar" id="tabBar"></div>
+  <!-- ビュー切り替え -->
+  <div class="view-switch" id="viewSwitch">
+    <button data-view="tree"   class="active">ツリー表示</button>
+    <button data-view="detail">詳細一覧</button>
+  </div>
 
-  <!-- 大描画キャンバス -->
-  <div id="taskContainer"></div>
+  <!-- ツリー表示用ラッパ -->
+  <div id="treeView">
+    <div class="tab-bar" id="tabBar"></div>
+    <div id="taskContainer"></div>
+  </div>
 
-  <!-- 下部タスク一覧 -->
-  <div id="taskListPanel">
-    <div class="tasklist-header">
-      <h4>タスク一覧</h4>
-      <button id="collapseListBtn" type="button">▼</button>
+  <!-- 詳細一覧表示 -->
+  <div id="detailView" hidden>
+    <div id="detailTableWrap"></div>
+  </div>
+
+  <!-- 詳細編集モーダル -->
+  <div id="detailModal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-content">
+      <h3 id="detailModalTitle">タスク詳細編集</h3>
+      <form id="detailForm">
+        <input type="hidden" id="detailTaskId" />
+        <div class="form-row">
+          <label>担当者</label>
+          <input type="text" id="detailAssignee" />
+        </div>
+        <div class="form-row">
+          <label>見積 (h)</label>
+          <input type="number" id="detailEstimate" min="0" step="0.5" />
+        </div>
+        <div class="form-row">
+          <label>優先度</label>
+          <select id="detailPriority">
+            <option value="">(未設定)</option>
+            <option>High</option>
+            <option>Medium</option>
+            <option>Low</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>リンク</label>
+          <input type="url" id="detailLink" placeholder="https://..." />
+        </div>
+        <div class="form-row">
+          <label>メモ</label>
+          <textarea id="detailNotes" rows="3"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="detailCancel">キャンセル</button>
+          <button type="submit" id="detailSave" class="primary">保存</button>
+        </div>
+      </form>
     </div>
-    <div id="taskListBody"></div>
   </div>
 
   <script src="script.js"></script>

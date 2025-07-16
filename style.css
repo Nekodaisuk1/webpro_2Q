@@ -13,9 +13,7 @@
 body{
   font-family:'Inter',sans-serif;
   margin:0;
-  /* controls + tab-bar + 下部リスト分スペース */
-  padding-top:110px;
-  padding-bottom:220px;
+  padding-top:150px; /* controls(高さ) + view-switch */
   background:var(--bg-light);
   color:var(--text-l);
   overflow:auto;
@@ -64,10 +62,34 @@ body.dark .controls{ background:var(--card-d); }
 #addBtn{ background:crimson; color:#fff; }
 .controls .tip{ font-size:.8rem; opacity:.8; }
 
-/* ===== タブバー ===== */
+/* ===== ビュー切替タブ ===== */
+.view-switch{
+  position:fixed;
+  top:110px; /* controls高さ後 */
+  width:100%;
+  text-align:center;
+  z-index:1800;
+}
+.view-switch button{
+  margin:0 .25rem;
+  padding:.3rem .8rem;
+  font-size:.9rem;
+  border:none;
+  border-radius:6px;
+  background:#ddd4;
+  cursor:pointer;
+}
+.view-switch button.active{
+  background:var(--accent);
+  color:#fff;
+}
+body.dark .view-switch button{ background:#333a; }
+body.dark .view-switch button.active{ background:var(--accent); color:#fff; }
+
+/* ===== タブバー (タスク一覧 for snap) ===== */
 .tab-bar{
   position:fixed;
-  top:70px;
+  top:150px;
   width:100%; height:40px;
   display:flex; align-items:center; gap:.6rem;
   padding:0 .8rem;
@@ -150,54 +172,90 @@ body.dark .task{ background:rgba(40,40,46,.55); border-color:#0006; }
   z-index:1000;
 }
 
-/* ===== 下部タスク一覧パネル ===== */
-#taskListPanel{
-  position:fixed;
-  left:50%; bottom:0;
-  translate:-50% 0;
-  width:clamp(320px,95%,1200px);
-  max-height:200px;
-  background:var(--card-l);
-  backdrop-filter:blur(var(--blur));
-  -webkit-backdrop-filter:blur(var(--blur));
-  box-shadow:0 -2px 8px rgba(0,0,0,.1);
-  border-radius:12px 12px 0 0;
-  z-index:1800;
-  display:flex;
-  flex-direction:column;
+/* ===== 詳細一覧ビュー ===== */
+#detailView{
+  max-width:1100px;
+  margin:0 auto;
+  padding:2rem 1rem;
 }
-body.dark #taskListPanel{ background:var(--card-d); }
-#taskListPanel.collapsed{ max-height:32px; overflow:hidden; }
-#taskListPanel .tasklist-header{
-  display:flex; align-items:center; justify-content:space-between;
-  padding:.4rem .8rem;
+.detail-table{
+  width:100%;
+  border-collapse:collapse;
   font-size:.9rem;
 }
-#collapseListBtn{
-  background:none; border:none; cursor:pointer;
-  font-size:1.1rem; line-height:1;
-  color:var(--accent);
-}
-#taskListBody{
-  overflow-y:auto;
-  max-height:160px;
-}
-.tasklist-table{
-  width:100%; border-collapse:collapse; font-size:.85rem;
-}
-.tasklist-table th,
-.tasklist-table td{
-  padding:.25rem .5rem;
+.detail-table th,
+.detail-table td{
+  padding:.5rem .75rem;
   border-bottom:1px solid #0001;
   text-align:left;
 }
-.tasklist-table tr:hover{ background:rgba(0,0,0,.05); cursor:pointer; }
-body.dark .tasklist-table tr:hover{ background:rgba(255,255,255,.1); }
+.detail-table tr:hover{
+  background:rgba(0,0,0,.05);
+  cursor:pointer;
+}
+body.dark .detail-table tr:hover{ background:rgba(255,255,255,.1); }
+.detail-action-btn{
+  padding:.2rem .6rem;
+  font-size:.8rem;
+  border:none;
+  border-radius:6px;
+  background:var(--accent);
+  color:#fff;
+  cursor:pointer;
+}
+
+/* ===== モーダル ===== */
+.modal{
+  position:fixed;
+  inset:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:rgba(0,0,0,.45);
+  z-index:3000;
+}
+.modal.hidden{ display:none; }
+.modal-content{
+  width:clamp(300px,90%,480px);
+  background:var(--card-l);
+  backdrop-filter:blur(var(--blur));
+  -webkit-backdrop-filter:blur(var(--blur));
+  padding:1.5rem;
+  border-radius:12px;
+  box-shadow:var(--ring);
+}
+body.dark .modal-content{ background:var(--card-d); }
+.modal-content h3{ margin-top:0; }
+.form-row{ margin-bottom:1rem; display:flex; flex-direction:column; gap:.25rem; }
+.form-row label{ font-size:.85rem; opacity:.8; }
+.form-row input,
+.form-row select,
+.form-row textarea{
+  padding:.5rem;
+  font-size:1rem;
+  border:none;
+  border-radius:6px;
+  background:#fff4;
+  color:inherit;
+}
+.modal-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:.5rem;
+}
+.modal-actions button{
+  padding:.5rem 1rem;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+.modal-actions .primary{ background:var(--accent); color:#fff; }
 
 /* ===== レスポンシブ ===== */
 @media(max-width:600px){
   .task{ width:80px; height:80px; font-size:.6rem; }
   .radius-slider{ width:90px; }
   .controls{ gap:.4rem; }
-  #taskListBody{ max-height:120px; }
+  .view-switch{ font-size:.85rem; }
+  .modal-content{ padding:1rem; }
 }
