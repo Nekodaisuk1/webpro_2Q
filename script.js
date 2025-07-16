@@ -1,7 +1,7 @@
 let tasks = [];
 let taskId = 0;
 let lines = [];
-let circleSettings = {}; // 子円の中心位置と半径
+let circleSettings = {};
 
 function addTask() {
   const name = document.getElementById("taskName").value;
@@ -47,11 +47,11 @@ function render() {
   const container = document.getElementById("taskContainer");
   container.innerHTML = "";
   clearLines();
-  circleSettings = {}; // 子円情報を初期化
+  circleSettings = {};
 
-  const centerX = window.innerWidth / 2;
-  const centerY = window.innerHeight / 2;
-  const radius = 200;
+  const centerX = 2500;
+  const centerY = 2500;
+  const radius = 300;
   const roots = getRoots();
   const angleStep = (2 * Math.PI) / roots.length;
 
@@ -79,10 +79,9 @@ function layoutChildren(parent, parentX, parentY, baseAngle, depth = 1) {
   if (children.length === 0) return;
 
   const defaultRadius = 120;
-  const baseDistance = 250;
-  const spreadFactor = 40;
+  const baseDistance = 300;
+  const spreadFactor = 50;
 
-  // 子円の中心を決定（親から一定距離）
   const distance = baseDistance + children.length * spreadFactor;
   const circleX = parentX + Math.cos(baseAngle) * distance;
   const circleY = parentY + Math.sin(baseAngle) * distance;
@@ -92,7 +91,6 @@ function layoutChildren(parent, parentX, parentY, baseAngle, depth = 1) {
     circleSettings[circleId] = { radius: defaultRadius };
   }
 
-  // スライダーを子円中心の近くに追加
   createRadiusSlider(circleId, circleX, circleY);
 
   const r = circleSettings[circleId].radius;
@@ -108,7 +106,6 @@ function layoutChildren(parent, parentX, parentY, baseAngle, depth = 1) {
     const toEl = document.getElementById("task-" + child.id);
     drawLineBetween(fromEl, toEl);
 
-    // 再帰的に孫を処理
     layoutChildren(child, childX, childY, angle, depth + 1);
   });
 }
@@ -125,7 +122,7 @@ function createRadiusSlider(circleId, x, y) {
   positionElement(slider, x, y + 70);
   slider.oninput = () => {
     circleSettings[circleId].radius = parseInt(slider.value);
-    render(); // スライダー変更時に再描画
+    render();
   };
   container.appendChild(slider);
 }

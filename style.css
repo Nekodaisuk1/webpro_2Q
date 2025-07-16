@@ -3,19 +3,11 @@ body {
   background: #f2f2f2;
   margin: 0;
   padding: 1rem;
+  overflow: auto;
 }
 .controls {
   margin-bottom: 1rem;
 }
-.radius-slider {
-  position: absolute;
-  z-index: 1000;
-  pointer-events: all;
-}
-#taskContainer {
-  position: relative;
-}
-
 .task {
   position: absolute;
   background: white;
@@ -37,4 +29,17 @@ button {
   border: none;
   padding: 0.3rem 0.7rem;
   border-radius: 4px;
+}
+#taskContainer {
+  position: relative;
+  width: 5000px;
+  height: 5000px;
+  min-width: 3000px;
+  min-height: 3000px;
+  overflow: visible;
+}
+.radius-slider {
+  position: absolute;
+  z-index: 1000;
+  pointer-events: all;
 }
