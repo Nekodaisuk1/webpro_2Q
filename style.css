@@ -1,58 +1,65 @@
-body {
-  font-family: sans-serif;
-  background: #f2f2f2;
-  margin: 0;
-  padding-top: 70px;
-  overflow: auto;
+/* ===== レイアウト全般 ===== */
+body{
+  font-family:sans-serif;
+  background:#f2f2f2;
+  margin:0;
+  /* controls 70px + tab-bar 40px */
+  padding-top:110px;
+  overflow:auto;
 }
-.controls {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  background: white;
-  padding: 1rem;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  z-index: 2000;
+
+/* --- 入力欄 --- */
+.controls{
+  position:fixed; top:0; width:100%;
+  background:#fff; padding:1rem;
+  box-shadow:0 2px 5px rgba(0,0,0,.1);
+  z-index:2000;
 }
-.task {
-  position: absolute;
-  background: white;
-  border-radius: 50%;
-  padding: 1rem;
-  text-align: center;
-  box-shadow: 0 0 8px rgba(0,0,0,0.1);
-  width: 100px;
-  height: 100px;
-  transform: translate(-50%, -50%);
+
+/* --- タブバー --- */
+.tab-bar{
+  position:fixed; top:70px; width:100%; height:40px;
+  background:#fafafa; border-bottom:1px solid #ddd;
+  overflow-x:auto; white-space:nowrap;
+  z-index:1500;
 }
-.task h3 {
-  margin: 0.3rem 0;
+.tab-bar button{
+  display:inline-block; height:100%;
+  padding:0 1rem; background:none; border:none;
+  cursor:pointer; font-size:.9rem;
 }
-button {
-  margin-top: 0.5rem;
-  background: crimson;
-  color: white;
-  border: none;
-  padding: 0.3rem 0.7rem;
-  border-radius: 4px;
+.tab-active{ border-bottom:3px solid #0077ff; font-weight:bold; }
+
+/* --- 円形タスク --- */
+.task{
+  position:absolute;
+  width:100px; height:100px;
+  background:#fff; border-radius:50%;
+  padding:1rem; text-align:center;
+  box-shadow:0 0 8px rgba(0,0,0,.1);
+  transform:translate(-50%,-50%);
 }
-#taskContainer {
-  position: relative;
-  width: 5000px;
-  height: 5000px;
-  min-width: 3000px;
-  min-height: 3000px;
-  overflow: visible;
+.task h3{ margin:.3rem 0; }
+
+/* --- 共通ボタン --- */
+button{ background:crimson; color:#fff;
+  border:none; border-radius:4px; padding:.3rem .7rem; }
+
+/* --- 大描画キャンバス --- */
+#taskContainer{
+  position:relative;
+  width:5000px; height:5000px;  /* 広大に確保 */
+  min-width:3000px; min-height:3000px; overflow:visible;
 }
-.radius-slider {
-  position: absolute;
-  z-index: 1000;
-  pointer-events: all;
+
+/* --- 円の半径スライダー --- */
+.radius-slider{
+  position:absolute; pointer-events:all; z-index:1000;
 }
-.circle-visual {
-  position: absolute;
-  border: 1px dashed #999;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 0;
+
+/* --- 子配置円（可視化） --- */
+.circle-visual{
+  position:absolute; border:1px dashed #999;
+  border-radius:50%; transform:translate(-50%,-50%);
+  z-index:0;
 }

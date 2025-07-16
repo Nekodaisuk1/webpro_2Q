@@ -1,146 +1,134 @@
-let tasks = [];
-let taskId = 0;
-let lines = [];
-let circleSettings = {};
+/* === データ === */
+let tasks = [];          // 全タスク
+let taskId = 0;          // 連番 ID
+let lines = [];          // LeaderLine インスタンス
+let circleSettings = {}; // 親 id → { radius }
 
-function addTask() {
-  const name = document.getElementById("taskName").value;
-  const func = document.getElementById("taskFunction").value;
-  const parentId = document.getElementById("parentSelect").value;
-
-  if (!name || !func) return;
-
+/* === 追加/取得ヘルパ === */
+function addTask(){
+  const name = taskName.value.trim();
+  const func = taskFunction.value.trim();
+  const parentId = parentSelect.value || null;
+  if(!name||!func) return;
   const id = taskId++;
-  tasks.push({ id, name, func, parentId: parentId || null });
-
-  const option = document.createElement("option");
-  option.value = id;
-  option.textContent = name;
-  document.getElementById("parentSelect").appendChild(option);
-
+  tasks.push({id,name,func,parentId});
+  parentSelect.insertAdjacentHTML("beforeend",
+    `<option value="${id}">${name}</option>`);
   render();
 }
+const getChildren=id=>tasks.filter(t=>t.parentId==id);
+const getRoots   =()=>tasks.filter(t=>t.parentId===null);
 
-function getChildren(id) {
-  return tasks.filter(t => t.parentId == id);
+/* === 座標/描画ユーティリティ === */
+const container = document.getElementById("taskContainer");
+function position(el,x,y){ el.style.left=`${x}px`; el.style.top=`${y}px`; }
+function clearLines(){ lines.forEach(l=>l.remove()); lines=[]; }
+function drawLineToCenter(fromEl,cx,cy){
+  const dummy=document.createElement("div");
+  Object.assign(dummy.style,{
+    position:"absolute",left:`${cx}px`,top:`${cy}px`,
+    width:0,height:0
+  });
+  container.appendChild(dummy);
+  lines.push(new LeaderLine(fromEl,dummy));
 }
 
-function getRoots() {
-  return tasks.filter(t => t.parentId === null);
+/* === タブバー === */
+function renderTabs(activeId=null){
+  const bar=document.getElementById("tabBar");
+  bar.innerHTML="";
+  tasks.forEach(t=>{
+    const btn=document.createElement("button");
+    btn.textContent=t.name;
+    if(t.id===activeId) btn.className="tab-active";
+    btn.onclick=()=>{ snapToTask(t.id); renderTabs(t.id); };
+    bar.appendChild(btn);
+  });
+}
+function snapToTask(id){
+  const el=document.getElementById("task-"+id);
+  if(!el) return;
+  const x=parseInt(el.style.left), y=parseInt(el.style.top);
+  window.scrollTo({left:x-window.innerWidth/2,
+                   top :y-window.innerHeight/2, behavior:"smooth"});
 }
 
-function positionElement(el, x, y) {
-  el.style.left = x + "px";
-  el.style.top = y + "px";
+/* === メイン再描画 === */
+function render(){
+  container.innerHTML=""; clearLines(); circleSettings={};
+
+  const centerX=2500, centerY=2500, rootR=300;
+  const roots=getRoots(); if(!roots.length) return;
+  const rootStep=(2*Math.PI)/roots.length;
+
+  roots.forEach((root,i)=>{
+    const ang=i*rootStep, x=centerX+Math.cos(ang)*rootR,
+          y=centerY+Math.sin(ang)*rootR;
+    createTaskElement(root,x,y);
+    layoutChildren(root,x,y,ang);
+  });
+
+  renderTabs();                 // タブ再生成
 }
 
-function drawLineBetween(fromEl, toX, toY) {
-  const dummy = document.createElement("div");
-  dummy.style.position = "absolute";
-  dummy.style.left = toX + "px";
-  dummy.style.top = toY + "px";
-  dummy.style.width = "0";
-  dummy.style.height = "0";
-  document.getElementById("taskContainer").appendChild(dummy);
-  lines.push(new LeaderLine(fromEl, dummy));
+/* --- タスクDOM生成 --- */
+function createTaskElement(t,x,y){
+  container.insertAdjacentHTML("beforeend",
+    `<div class="task" id="task-${t.id}">
+       <h3>${t.name}</h3><p>機能:${t.func}</p>
+     </div>`);
+  position(document.getElementById("task-"+t.id),x,y);
 }
 
-function clearLines() {
-  lines.forEach(l => l.remove());
-  lines = [];
-}
+/* --- 子円レイアウト（再帰） --- */
+function layoutChildren(parent,px,py,baseAng){
+  const kids=getChildren(parent.id); if(!kids.length) return;
 
-function render() {
-  const container = document.getElementById("taskContainer");
-  container.innerHTML = "";
-  clearLines();
-  circleSettings = {};
+  // 円心を親から離す距離
+  const dist = 300 + kids.length*50;
+  const cx   = px + Math.cos(baseAng)*dist;
+  const cy   = py + Math.sin(baseAng)*dist;
 
-  const centerX = 2500;
-  const centerY = 2500;
-  const radius = 300;
-  const roots = getRoots();
-  const angleStep = (2 * Math.PI) / roots.length;
+  // 円半径（スライダー値保持）
+  if(!circleSettings[parent.id]) circleSettings[parent.id]={radius:120};
+  const r = circleSettings[parent.id].radius;
 
-  roots.forEach((task, i) => {
-    const angle = i * angleStep;
-    const x = centerX + Math.cos(angle) * radius;
-    const y = centerY + Math.sin(angle) * radius;
-    createTaskElement(task, x, y);
-    layoutChildren(task, x, y, angle);
+  // 可視円
+  drawCircle(cx,cy,r);
+  // 親→円心へ 1 本だけ矢印
+  drawLineToCenter(document.getElementById("task-"+parent.id),cx,cy);
+  // 半径調整スライダー
+  createSlider(parent.id,cx,cy+70);
+
+  // 子を円周に配置
+  const step=(2*Math.PI)/kids.length;
+  kids.forEach((kid,i)=>{
+    const ang=i*step, kx=cx+Math.cos(ang)*r, ky=cy+Math.sin(ang)*r;
+    createTaskElement(kid,kx,ky);
+    layoutChildren(kid,kx,ky,ang);
   });
 }
 
-function createTaskElement(task, x, y) {
-  const container = document.getElementById("taskContainer");
-  const div = document.createElement("div");
-  div.className = "task";
-  div.id = "task-" + task.id;
-  div.innerHTML = `<h3>${task.name}</h3><p>機能: ${task.func}</p>`;
-  container.appendChild(div);
-  positionElement(div, x, y);
+/* --- 円可視化 --- */
+function drawCircle(x,y,r){
+  const el=document.createElement("div");
+  el.className="circle-visual";
+  el.style.width=el.style.height=r*2+"px";
+  position(el,x,y); container.appendChild(el);
 }
 
-function layoutChildren(parent, parentX, parentY, baseAngle) {
-  const children = getChildren(parent.id);
-  if (children.length === 0) return;
-
-  const defaultRadius = 120;
-  const baseDistance = 300;
-  const spreadFactor = 50;
-
-  const distance = baseDistance + children.length * spreadFactor;
-  const circleX = parentX + Math.cos(baseAngle) * distance;
-  const circleY = parentY + Math.sin(baseAngle) * distance;
-
-  const circleId = parent.id;
-  if (!circleSettings[circleId]) {
-    circleSettings[circleId] = { radius: defaultRadius };
-  }
-
-  createRadiusSlider(circleId, circleX, circleY);
-  drawCircleVisual(circleX, circleY, circleSettings[circleId].radius);
-
-  const r = circleSettings[circleId].radius;
-  const angleStep = (2 * Math.PI) / children.length;
-
-  drawLineBetween(document.getElementById("task-" + parent.id), circleX, circleY);
-
-  children.forEach((child, i) => {
-    const angle = i * angleStep;
-    const childX = circleX + Math.cos(angle) * r;
-    const childY = circleY + Math.sin(angle) * r;
-    createTaskElement(child, childX, childY);
-    layoutChildren(child, childX, childY, angle);
-  });
+/* --- スライダー --- */
+function createSlider(pid,x,y){
+  const s=document.createElement("input");
+  s.type="range"; s.min=50; s.max=300;
+  s.value=circleSettings[pid].radius; s.className="radius-slider";
+  position(s,x,y); container.appendChild(s);
+  s.oninput=()=>{ circleSettings[pid].radius=parseInt(s.value); render(); };
 }
 
-function createRadiusSlider(circleId, x, y) {
-  const container = document.getElementById("taskContainer");
-  const slider = document.createElement("input");
-  slider.type = "range";
-  slider.min = 50;
-  slider.max = 300;
-  slider.value = circleSettings[circleId].radius;
-  slider.className = "radius-slider";
-
-  positionElement(slider, x, y + 70);
-  slider.oninput = () => {
-    circleSettings[circleId].radius = parseInt(slider.value);
-    render();
-  };
-  container.appendChild(slider);
-}
-
-function drawCircleVisual(x, y, r) {
-  const container = document.getElementById("taskContainer");
-  const circle = document.createElement("div");
-  circle.className = "circle-visual";
-  circle.style.width = circle.style.height = (r * 2) + "px";
-  positionElement(circle, x, y);
-  container.appendChild(circle);
-}
-
-window.onload = () => {
-  window.scrollTo(2000, 2000); // 初期スナップ表示
-};
+/* === 初期化 === */
+window.addEventListener("load",()=>{
+  window.scrollTo(2000,2000);  // 中央スナップ
+  renderTabs();                // 空でもタブバーを表示
+});
+window.addEventListener("resize",()=>render());
